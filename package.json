@@ -14,10 +14,12 @@
 		"build-nofix": "npm run clean && npm run build-tsc && npm run build-apps-postprettier",
 		"build-tsc": "npx tsgo && npm run copyAssets",
 		"clean": "find . -name .DS_Store -exec rm {} +",
-		"makeinstaller": "node scripts/mkinstaller --app=app.idx --out=installer.inst"
+		"makeinstaller": "node scripts/mkinstaller --app=app.idx --out=installer.inst",
+		"expose": "npx http-server . --port 5172 --cors"
 	},
 	"devDependencies": {
 		"@typescript/native-preview": "7.0.0-dev.20250624.1",
+		"http-server": "^14.1.1",
 		"prettier": "3.5.3"
 	},
 	"os": [
