@@ -17,7 +17,7 @@
 		"makeinstaller": "node scripts/mkinstaller --app=app.idx --out=installer.inst"
 	},
 	"devDependencies": {
-		"@typescript/native-preview": "7.0.0-dev.20250724.1",
+		"@typescript/native-preview": "7.0.0-dev.20250624.1",
 		"prettier": "3.5.3"
 	},
 	"os": [
