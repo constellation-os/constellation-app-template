@@ -1,5 +1,3 @@
-// @ts-nocheck
-
 export default class TemplateApp extends Application {
 	time: Number = Date.now();
 	hasClickedTheButton: Boolean = false;
