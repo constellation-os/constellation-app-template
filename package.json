@@ -7,7 +7,8 @@
 	"scripts": {
 		"init": "npm ci",
 		"fix": "prettier src --write",
-		"build": "npm run fix && npm run build-nofix && npm run makeinstaller",
+		"build": "npm run build-app",
+		"build-app": "npm run fix && npm run build-nofix && npm run makeinstaller",
 		"copyAssets": "node scripts/copy.mjs",
 		"build-apps-postprettier": "/bin/bash scripts/package.sh",
 		"build-nofix": "npm run clean && npm run build-tsc && npm run build-apps-postprettier",
