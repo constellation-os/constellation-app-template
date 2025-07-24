@@ -3,7 +3,7 @@
 # packager
 
 compile() {
-    mkdir build
+    mkdir -p build
 
     # Build the app
     ./scripts/tcpkg build app.idx -override=true

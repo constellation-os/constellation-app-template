@@ -10,10 +10,8 @@
 		"outDir": "build",
 		"strict": true,
 		"lib": ["esnext", "ES2022", "DOM", "DOM.Iterable", "ES5", "ES6"],
-		"types": ["./constellation.d.ts"],
-		"sourceMap": false,
-		"declaration": true,
-		"declarationDir": "types",
+		"types": ["./constellation"],
+		"sourceMap": false
 	},
 	"include": ["src"],
 	"watchOptions": {

@@ -1,0 +1,44 @@
+#! /usr/bin/env node
+
+import fs from "node:fs/promises";
+import path from "node:path";
+
+import * as config from "../build/config.js";
+
+const installer = {
+	app: config,
+	data: undefined
+};
+
+const text = JSON.stringify(installer);
+
+const params = {};
+const args = process.argv
+	.splice(2, Infinity)
+	.map((item) => {
+		if (item[0] == "-") {
+			// it's a parameter
+			const name = item.substring(1, Infinity).split("=")[0];
+			const value = item.substring(item.indexOf("=") + 1, Infinity);
+
+			params[name] = value;
+
+			return undefined;
+		}
+
+		return item;
+	})
+	.filter((item) => item !== undefined);
+
+const appDir = path.resolve(process.cwd(), params["-app"]);
+const app = JSON.parse((await fs.readFile(appDir)).toString());
+
+installer.data = app;
+
+const outDir = path.resolve(process.cwd(), params["-out"]);
+
+await fs.writeFile(outDir, JSON.stringify(installer, null, 4));
+
+console.log(
+	`Installation media created at '\x1b[32m${outDir}\x1b[0m' successfully!`
+);
