@@ -66,7 +66,7 @@ type uikitTextboxConfig = {
     isInvisible?: boolean;
     isEmpty?: boolean;
     fontSize?: number;
-    disableMobileAutocorrect: boolean;
+    disableMobileAutocorrect?: boolean;
 };
 type uikitTextareaConfig = {
     isInvisible?: boolean;
@@ -98,8 +98,10 @@ declare class Renderer {
     windowX: number;
     windowY: number;
     moveWindow(x?: number, y?: number, z?: number): void;
-    readonly renameWindow: (name: string) => void;
-    readonly setShortName: (name: string | undefined) => void;
+    set windowName(name: string);
+    get windowName(): string;
+    get windowShortName(): string | undefined;
+    set windowShortName(name: string | undefined);
     readonly setIcon: (name: string) => void;
     makeWindowInvisible(): void;
     makeWindowVisible(): void;
@@ -207,7 +209,6 @@ declare global {
         BackgroundProcess: new (directory: string, args: any[]) => BackgroundProcess;
         Popup: new (directory: string, args: any[]) => Popup;
         Module: new (directory: string, args: any[]) => Module;
-        sysimport: any;
         processes: Process[];
         env: ApplicationAuthorisationAPI;
         windows: GraphicalWindow[];

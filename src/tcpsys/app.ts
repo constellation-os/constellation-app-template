@@ -6,7 +6,7 @@ export default class TemplateApp extends Application {
 		this.name = "Template App";
 
 		this.renderer.setIcon("gallery-thumbnails");
-		this.renderer.renameWindow("Template App");
+		this.renderer.windowName = "Template App";
 	}
 
 	frame() {
