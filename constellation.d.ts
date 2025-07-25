@@ -1,5 +1,7 @@
 export {}
 
+declare function getTextWidth(text: string, size?: number, fontFamily?: string): number;
+
 declare global {
     interface Window {
         windows: GraphicalWindow[];
@@ -52,14 +54,13 @@ declare class GraphicalWindow {
     close(): void;
 }
 
-declare function getTextWidth(text: string, size?: number, fontFamily?: string): number;
-
-type uiKitCreators = Record<string, (...args: any[]) => HTMLElement>;
 interface onClickOptions {
     scale?: number;
     origin?: string;
 }
 interface textboxCallbackObject {
+    update?: Function;
+    enter?: Function;
 }
 type uikitTextboxConfig = {
     isInvisible?: boolean;
@@ -76,30 +77,40 @@ type uikitBoxConfig = {
     borderRadius?: number | string;
     colour?: string; // colour but typescript is stupid and doesn't know rgb(255, 255, 255) is a colour 🤦
 };
+type uikitCanvasOptions = {
+    colour: string;
+};
+
 // class
 declare class Renderer {
     #private;
     defaultConfig: {
-        uikitTextbox: {
-            isInvisible: boolean;
-            isEmpty: boolean;
-            fontSize: undefined;
-            disableMobileAutocorrect: boolean;
-        };
-        uikitTextarea: {
-            isInvisible: boolean;
-            isEmpty: boolean;
-            disableMobileAutocorrect: boolean;
-        };
-        uikitBox: {
-            borderRadius: number;
-            colour: string;
-        };
+        uikitTextbox: uikitTextboxConfig;
+        uikitTextarea: uikitTextareaConfig;
+        uikitBox: uikitBoxConfig;
+        uikitCanvasStep: uikitCanvasOptions;
     };
-    constructor(process: Process);
-    window: GraphicalWindow;
-    clear: () => void;
     elemID: number;
+    // window stuff
+    windowWidth: number;
+    windowHeight: number;
+    resizeWindow(width: number, height: number): void;
+    windowX: number;
+    windowY: number;
+    moveWindow(x?: number, y?: number, z?: number): void;
+    readonly renameWindow: (name: string) => void;
+    readonly setShortName: (name: string | undefined) => void;
+    readonly setIcon: (name: string) => void;
+    makeWindowInvisible(): void;
+    makeWindowVisible(): void;
+    hideWindowCorners(): void;
+    showWindowCorners(): void;
+    hideWindowHeader(): void;
+    showWindowHeader(): void;
+    minimiseWindow(): void;
+    restoreWindow(): void;
+    constructor(process: Process);
+    clear: () => void;
     readonly icon: (x?: number, y?: number, name?: string, scale?: number) => number;
     readonly text: (x: number, y: number, string: string, size?: number) => number;
     readonly button: (x: number, y: number, string: string, leftClickCallback?: Function, rightClickCallback?: Function, size?: number) => number;
@@ -109,17 +120,26 @@ declare class Renderer {
     readonly progressBar: (x: number, y: number, width: number, height: number, progress: number | "throb") => number;
     readonly textarea: (x: number, y: number, width: number, height: number, callbacks: textboxCallbackObject, options?: uikitTextareaConfig) => number;
     readonly box: (x: number, y: number, width: number, height: number, config: uikitBoxConfig) => number;
+    readonly canvas2D: (x: number, y: number, width: number, height: number) => number;
+    //readonly canvas3D = (
+    //	x: number,
+    //	y: number,
+    //	width: number,
+    //	height: number
+    //) => {
+    //	const obj: step = {
+    //		type: "uikitCanvas3D",
+    //		args: [x, y, width, height, []] // last arguement (the []) is the list of drawing commands
+    //	};
+    //	return this.#steps.push(obj);
+    //};
     onClick(elemID: number, leftClickCallback?: Function, rightClickCallback?: Function, otherConfig?: onClickOptions): void;
     awaitClick(callback: () => void | Promise<void>): Promise<void>;
     readonly getTextWidth: typeof getTextWidth;
-    readonly setWindowIcon: (name: string) => void;
     readonly setTextboxContent: (content: string) => void;
     readonly getTextboxContent: () => string | null;
-    readonly creators: uiKitCreators;
     readonly setContextMenu: (x: number, y: number, header: string, buttons: Record<string, Function>) => void;
     readonly removeContextMenu: () => void;
-    windowWidth: number;
-    windowHeight: number;
     redraw: () => void;
     readonly commit: () => void;
     terminate(): void;
