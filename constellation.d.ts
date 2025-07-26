@@ -75,7 +75,7 @@ type uikitTextareaConfig = {
 };
 type uikitBoxConfig = {
     borderRadius?: number | string;
-    colour?: string; // colour but typescript is stupid and doesn't know rgb(255, 255, 255) is a colour 🤦
+    background?: string;
 };
 type uikitCanvasOptions = {
     colour: string;
