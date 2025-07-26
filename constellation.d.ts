@@ -121,20 +121,8 @@ declare class Renderer {
     readonly horizontalLine: (x: number, y: number, width: number) => number;
     readonly progressBar: (x: number, y: number, width: number, height: number, progress: number | "throb") => number;
     readonly textarea: (x: number, y: number, width: number, height: number, callbacks: textboxCallbackObject, options?: uikitTextareaConfig) => number;
-    readonly box: (x: number, y: number, width: number, height: number, config: uikitBoxConfig) => number;
+    readonly box: (x: number, y: number, width: number, height: number, config?: uikitBoxConfig | undefined) => number;
     readonly canvas2D: (x: number, y: number, width: number, height: number) => number;
-    //readonly canvas3D = (
-    //	x: number,
-    //	y: number,
-    //	width: number,
-    //	height: number
-    //) => {
-    //	const obj: step = {
-    //		type: "uikitCanvas3D",
-    //		args: [x, y, width, height, []] // last arguement (the []) is the list of drawing commands
-    //	};
-    //	return this.#steps.push(obj);
-    //};
     onClick(elemID: number, leftClickCallback?: Function, rightClickCallback?: Function, otherConfig?: onClickOptions): void;
     awaitClick(callback: () => void | Promise<void>): Promise<void>;
     readonly getTextWidth: typeof getTextWidth;
