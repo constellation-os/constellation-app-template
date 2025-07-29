@@ -38,6 +38,10 @@ declare class GraphicalWindow {
     set minimised(value: boolean);
     minimise(): void;
     unminimise(): void;
+    fullscreen(): void;
+    unfullscreen(): void;
+    get fullscreened(): boolean;
+    set fullscreened(value: boolean);
     visible: boolean;
     dimensions: {
         width: number;
@@ -54,13 +58,49 @@ declare class GraphicalWindow {
     close(): void;
 }
 
+declare class uiKitCreators {
+    #private;
+    textboxElem: HTMLInputElement | HTMLTextAreaElement | undefined;
+    hasTextbox: boolean;
+    constructor(parent: Renderer, window: GraphicalWindow);
+    uikitIcon: (x?: number, y?: number, name?: string, scale?: number) => HTMLElement;
+    uikitText: (x: number, y: number, string: string, size: number) => HTMLParagraphElement;
+    uikitButton: (x: number, y: number, string: string, leftClickCallback: () => void, rightClickCallback: () => void, size: number) => HTMLButtonElement;
+    uikitTextbox: (x?: number, y?: number, width?: number, height?: number, backtext?: string, callbacks?: {
+        update: (key: string, value: string) => void;
+        enter: (value: string) => void;
+    }, options?: uikitTextboxConfig) => HTMLInputElement;
+    uikitVerticalLine: (x: number, y: number, height: number) => HTMLDivElement;
+    uikitHorizontalLine: (x: number, y: number, width: number) => HTMLDivElement;
+    uikitProgressBar: (x: number, y: number, width: number, height: number, progress: number | "throb") => HTMLDivElement;
+    uikitTextarea: (x: number, y: number, width: number, height: number, callbacks: any, options?: uikitTextareaConfig) => HTMLTextAreaElement;
+    uikitBox: (x?: number, y?: number, width?: number, height?: number, config?: uikitBoxConfig | undefined) => HTMLDivElement;
+    uikitCanvas2D: (x: number, y: number, width: number, height: number, renderingSteps: canvasRenderingStep[], options: uikitCanvasOptions) => HTMLCanvasElement;
+}
+
+type uikitCreatorName = {
+    [K in keyof uiKitCreators]: K extends `uikit${string}` ? K : never;
+}[keyof uiKitCreators];
 interface onClickOptions {
     scale?: number;
     origin?: string;
 }
+interface clickReference extends onClickOptions {
+    left?: Function;
+    right?: Function;
+}
+interface step {
+    type: uikitCreatorName;
+    args: any[];
+    onClick?: clickReference;
+}
 interface textboxCallbackObject {
     update?: Function;
     enter?: Function;
+}
+interface canvasRenderingStep {
+    type: "line" | "rectangle" | "text" | "image";
+    data: any;
 }
 type uikitTextboxConfig = {
     isInvisible?: boolean;
@@ -80,6 +120,18 @@ type uikitBoxConfig = {
 type uikitCanvasOptions = {
     colour: string;
 };
+type canvasPosition = {
+    x: number;
+    y: number;
+};
+
+declare class canvasKit {
+    #private;
+    constructor(steps: step[]);
+    line(canvasID: number, colour: string, startingPosition: canvasPosition, ...otherPositions: canvasPosition[]): void;
+    box(canvasID: number, position1: canvasPosition, position2: canvasPosition, borderColour: string, backgroundColour: string): void;
+    image(canvasID: number, position: canvasPosition, width: number, height: number, url: string): void;
+}
 
 // class
 declare class Renderer {
@@ -91,6 +143,9 @@ declare class Renderer {
         uikitCanvasStep: uikitCanvasOptions;
     };
     elemID: number;
+    // add abort controller to remove event listeners
+    controller: AbortController;
+    signal: AbortSignal;
     // window stuff
     windowWidth: number;
     windowHeight: number;
@@ -111,6 +166,8 @@ declare class Renderer {
     showWindowHeader(): void;
     minimiseWindow(): void;
     restoreWindow(): void;
+    maximiseWindow(): void;
+    canvas: canvasKit;
     constructor(process: Process);
     clear: () => void;
     readonly icon: (x?: number, y?: number, name?: string, scale?: number) => number;
@@ -131,6 +188,9 @@ declare class Renderer {
     readonly setContextMenu: (x: number, y: number, header: string, buttons: Record<string, Function>) => void;
     readonly removeContextMenu: () => void;
     redraw: () => void;
+    /**
+     * Commits all UI elements since the last `renderer.clear()` call.
+     */
     readonly commit: () => void;
     terminate(): void;
 }
@@ -148,6 +208,19 @@ declare class IPCMessage {
     reply(data: any): void;
 }
 
+interface ProgramManifest {
+    name: string;
+    description: string;
+    category: "Productivity" | "Developer" | "Entertainment" | "Music" | "Games" | "Graphics and Design" | "Social" | "Weather" | "Utilities";
+    author: string;
+    version: number;
+    icon?: string;
+    dependencies?: string[];
+    /**
+     * Whether this application should be exposed to the user and displayed in search etc.
+     */
+    userspace?: boolean;
+}
 declare class Framework {
     constructor(directory: string, args: any[]);
     readonly directory: string;
@@ -202,23 +275,21 @@ declare global {
         windows: GraphicalWindow[];
     }
 }
+/**
+ *
+ * @param directory - Directory of the root of the application to execute from
+ * @param args - Arguements to be passed to the process
+ * @returns an Object containing a promise with the Process Waiting object - this promise will resolve when the process exits, and return the value the process exited with.
+ */
 declare function execute(directory: string, args?: any[]): Promise<{
     promise: Promise<unknown>;
 }>;
-declare global {
-    interface Window {
-        profileNextFrame: Boolean;
-    }
-}
-declare global {
-    interface Console {
-        profile: Function;
-        profileEnd: Function;
-    }
-}
 
 type Permission = "windows" | "systemControl" | "containers" | "systemFiles" | "userFiles" | "customPermissions" | "network" | "audioPlayback" | "microphone" | "camera" | "managePermissions" | "operator";
 
+/**
+ * The type which is exposed to CLI utilities as a proxy to the executing app, providing a standardised interface.
+ */
 interface TerminalAlias {
     path: string;
     env: ApplicationAuthorisationAPI;
@@ -245,13 +316,16 @@ type fsResponse = {
     ok: Boolean;
 };
 type directoryPointType = "blockDevice" | "characterDevice" | "directory" | "FIFO" | "file" | "socket" | "symbolicLink" | "none";
-type windowAlias = {
+type WindowAlias = {
     move: Function;
     resize: Function;
     close: Function;
     minimise: Function;
     unminimise: Function;
     minimised: boolean;
+    fullscreen: Function;
+    unfullscreen: Function;
+    fullscreened: boolean;
     show: Function;
     hide: Function;
     showHeader: Function;
@@ -283,6 +357,11 @@ declare class ApplicationAuthorisationAPI {
     log(initiator: string, ...content: any): undefined;
     warn(initiator: string, ...content: any): undefined;
     error(initiator: string, ...content: any): undefined;
+    /**
+     * Shows a graphical prompt onscreen
+     * @param text - the main statement
+     * @param reason - the description of this statement
+     */
     prompt(text: string, reason?: string): void;
     fs: {
         createDirectory: (directory: string) => Promise<fsResponse>;
@@ -302,10 +381,21 @@ declare class ApplicationAuthorisationAPI {
     exec: typeof execute;
     getPIDOfName(name: string): number | undefined;
     setDirectoryPermission(directory: string, permission: Permission, value: boolean): Promise<void>;
+    /**
+     * Provides the user a prompt to request a permission
+     * @param permission - the permission to request
+     * @returns Nothing - throws an error if the request is denied.
+     */
     requestUserPermission(permission: Permission): Promise<true | undefined>;
     windows: {
-        all: () => windowAlias[];
-        getFocus: () => windowAlias | undefined;
+        /**
+         * @returns an array for every window's WindowAlias
+         */
+        all: () => WindowAlias[];
+        /**
+         * @returns WindowAlias of the focused window
+         */
+        getFocus: () => WindowAlias | undefined;
     };
 }
 
@@ -346,4 +436,6 @@ declare global {
 	) => BackgroundProcess;
 	const Popup: new (directory: string, args: any[]) => Popup;
 	const Module: new (directory: string, args: any[]) => Module;
+
+	type ApplicationManifest = ProgramManifest;
 }
