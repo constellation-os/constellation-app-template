@@ -205,6 +205,19 @@ declare class IPCMessage {
     reply(data: any): void;
 }
 
+interface ApplicationManifest {
+    name: string;
+    description: string;
+    category: "Productivity" | "Developer" | "Entertainment" | "Music" | "Games" | "Graphics and Design" | "Social" | "Weather" | "Utilities";
+    author: string;
+    version: number;
+    icon?: string;
+    dependencies?: string[];
+    /**
+     * Whether this application should be exposed to the user and displayed in search etc.
+     */
+    userspace?: boolean;
+}
 declare class Framework {
     constructor(directory: string, args: any[]);
     readonly directory: string;
@@ -420,4 +433,6 @@ declare global {
 	) => BackgroundProcess;
 	const Popup: new (directory: string, args: any[]) => Popup;
 	const Module: new (directory: string, args: any[]) => Module;
+
+	type ApplicationManifest = ApplicationManifest;
 }
