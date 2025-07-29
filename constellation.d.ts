@@ -163,6 +163,7 @@ declare class Renderer {
     showWindowHeader(): void;
     minimiseWindow(): void;
     restoreWindow(): void;
+    maximiseWindow(): void;
     canvas: canvasKit;
     constructor(process: Process);
     clear: () => void;
