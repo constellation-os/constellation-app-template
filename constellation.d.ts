@@ -62,7 +62,7 @@ declare class uiKitCreators {
     #private;
     textboxElem: HTMLInputElement | HTMLTextAreaElement | undefined;
     hasTextbox: boolean;
-    constructor(parent: Renderer, window: GraphicalWindow, controller: AbortController);
+    constructor(parent: Renderer, window: GraphicalWindow);
     uikitIcon: (x?: number, y?: number, name?: string, scale?: number) => HTMLElement;
     uikitText: (x: number, y: number, string: string, size: number) => HTMLParagraphElement;
     uikitButton: (x: number, y: number, string: string, leftClickCallback: () => void, rightClickCallback: () => void, size: number) => HTMLButtonElement;
@@ -143,6 +143,9 @@ declare class Renderer {
         uikitCanvasStep: uikitCanvasOptions;
     };
     elemID: number;
+    // add abort controller to remove event listeners
+    controller: AbortController;
+    signal: AbortSignal;
     // window stuff
     windowWidth: number;
     windowHeight: number;
@@ -205,7 +208,7 @@ declare class IPCMessage {
     reply(data: any): void;
 }
 
-interface ApplicationManifest {
+interface ProgramManifest {
     name: string;
     description: string;
     category: "Productivity" | "Developer" | "Entertainment" | "Music" | "Games" | "Graphics and Design" | "Social" | "Weather" | "Utilities";
@@ -434,5 +437,5 @@ declare global {
 	const Popup: new (directory: string, args: any[]) => Popup;
 	const Module: new (directory: string, args: any[]) => Module;
 
-	type ApplicationManifest = ApplicationManifest;
+	type ApplicationManifest = ProgramManifest;
 }
