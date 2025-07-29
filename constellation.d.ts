@@ -38,6 +38,10 @@ declare class GraphicalWindow {
     set minimised(value: boolean);
     minimise(): void;
     unminimise(): void;
+    fullscreen(): void;
+    unfullscreen(): void;
+    get fullscreened(): boolean;
+    set fullscreened(value: boolean);
     visible: boolean;
     dimensions: {
         width: number;
@@ -302,6 +306,9 @@ type WindowAlias = {
     minimise: Function;
     unminimise: Function;
     minimised: boolean;
+    fullscreen: Function;
+    unfullscreen: Function;
+    fullscreened: boolean;
     show: Function;
     hide: Function;
     showHeader: Function;
